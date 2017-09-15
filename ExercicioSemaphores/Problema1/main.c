@@ -1,5 +1,5 @@
-// #include <pthread.h>
-// #include <semaphore.h>
+#include <pthread.h>
+#include <semaphore.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -31,33 +31,38 @@ void print_numbers_in_range(int start, int end, int processNumber) {
  *      ...                 ...
  */
 
-int* create_ranges(int interval) {
-    int ranges[NUM_PROCESSES][2];
+int** create_ranges(int interval) {
+    int** ranges;
+    ranges = (int**) malloc(sizeof(int*)*NUM_PROCESSES);
 
     for (int i = 0; i < NUM_PROCESSES; i++) {
-        ranges[i][0] = 1 + interval*i;
-        ranges[i][1] = interval + interval*i;
+        int* row;
+        row = (int*) malloc(sizeof(int)*2);
+
+        *row = 1 + interval*i;
+        *(row+1) = interval + interval*i;
+
+        *(ranges+i) = row;
     }
 
-    return &ranges;
+    return ranges;
 }
 
-void print_arr(int* ranges) {
+void print_arr(int** ranges) {
     printf("[ ");
 
     int* row;
     for (int i = 0; i < NUM_PROCESSES - 1; i++) {
-        // TODO: Not working due pointer issues
-        row = ranges[i];
-        printf(" [%d, %d]", row[0], row[1]);
+        row = *(ranges + i);
+        printf(" [%d, %d]", *row, *(row + 1));
     }
 
-    row = ranges[NUM_PROCESSES - 1];
-    printf(" [%d, %d] ]\n", row[0], row[1]);
+    row = *(ranges + NUM_PROCESSES - 1);
+    printf(" [%d, %d] ]\n", *row, *(row + 1));
 }
 
 int main() {
-    int* ranges;
+    int** ranges;
     ranges = create_ranges(200);
     print_arr(ranges);
 
